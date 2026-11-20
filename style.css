@@ -1,0 +1,382 @@
+/* „Woasch no?" – Adventskalender in der Stube: Weinrot, Kerzengold, Zirbenholz; Fotos wie im alten Album (mit Fotoecken).
+   Tag: warme Stube. Nacht: Heilige Nacht mit Kerzenlicht. Große Schrift & Knöpfe für alle Generationen. */
+:root {
+  --bg: #f6efe4;
+  --bg-tief: #ece1cf;
+  --flaeche: #fffbf4;
+  --tinte: #2b1e1a;
+  --leise: #6f5e53;
+  --linie: #e2d3bd;
+  --tanne: #8c2632;
+  --tanne-hell: #a3333e;
+  --auf-tanne: #fff7ea;
+  --zirbe: #d2a877;
+  --zirbe-hell: #e6c597;
+  --zirbe-dunkel: #8d6640;
+  --maserung: rgba(110, 72, 38, 0.12);
+  --nr: #4a2c14;
+  --nr-schatten: rgba(255, 255, 255, .4);
+  --kerze: #b07a1f;
+  --kerze-glanz: #e2b553;
+  --band: #8c2632;
+  --brett: #6b1c27;
+  --brett-tief: #4a111b;
+  --himmel-a: #2a0d18;
+  --himmel-b: #6b1c2b;
+  --himmel-c: #a2453f;
+  --gut: #3f7a53;
+  --gut-flaeche: #e7efe2;
+  --schlecht: #a3302b;
+  --schlecht-flaeche: #f6e3e1;
+  --papier: #fffdf7;
+  --schatten: 0 1px 2px rgba(60, 30, 20, .10), 0 8px 22px rgba(60, 30, 20, .10);
+  --f-titel: "Grenze Gotisch", "Alegreya", Georgia, serif;
+  --f-zier: "Alegreya", Georgia, "Times New Roman", serif;
+  --f-text: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "Atkinson Hyperlegible Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 14px;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --nav-h: 72px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15121b; --bg-tief: #0f0d14; --flaeche: #211c27; --tinte: #f2e9da; --leise: #b5aaa0; --linie: #372f3d;
+    --tanne: #e47a80; --tanne-hell: #ee9196; --auf-tanne: #1c0f13;
+    --zirbe: #8a6646; --zirbe-hell: #a07a55; --zirbe-dunkel: #5a3f27; --maserung: rgba(0, 0, 0, 0.2); --nr: #fbecd0; --nr-schatten: rgba(0, 0, 0, .45);
+    --kerze: #e3b252; --kerze-glanz: #f3cd75; --band: #b8434e; --brett: #4a1520; --brett-tief: #2c0b13;
+    --himmel-a: #08070d; --himmel-b: #1d1024; --himmel-c: #4a1a2c;
+    --gut: #86c69c; --gut-flaeche: #1d2b23; --schlecht: #e9837a; --schlecht-flaeche: #3a1d1b;
+    --papier: #f4ecdc; --schatten: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15121b; --bg-tief: #0f0d14; --flaeche: #211c27; --tinte: #f2e9da; --leise: #b5aaa0; --linie: #372f3d;
+  --tanne: #e47a80; --tanne-hell: #ee9196; --auf-tanne: #1c0f13;
+  --zirbe: #8a6646; --zirbe-hell: #a07a55; --zirbe-dunkel: #5a3f27; --maserung: rgba(0, 0, 0, 0.2); --nr: #fbecd0; --nr-schatten: rgba(0, 0, 0, .45);
+  --kerze: #e3b252; --kerze-glanz: #f3cd75; --band: #b8434e; --brett: #4a1520; --brett-tief: #2c0b13;
+  --himmel-a: #08070d; --himmel-b: #1d1024; --himmel-c: #4a1a2c;
+  --gut: #86c69c; --gut-flaeche: #1d2b23; --schlecht: #e9837a; --schlecht-flaeche: #3a1d1b;
+  --papier: #f4ecdc; --schatten: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--tinte);
+  font-family: var(--f-text); font-size: 19px; line-height: 1.5;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r);
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 24px);
+}
+body.ohne-nav { padding-bottom: 32px; }
+img, video { max-width: 100%; display: block; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--kerze-glanz); outline-offset: 2px; border-radius: 6px; }
+.wrap { max-width: 640px; margin: 0 auto; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.15; }
+p { margin: 0; }
+.leise { color: var(--leise); }
+.zahl { font-variant-numeric: tabular-nums lining-nums; }
+[hidden] { display: none !important; }
+
+/* ── Kopf: Nachthimmel mit Schnee über den Bergen ── */
+.kopf { position: relative; overflow: hidden; color: #fbf1df;
+  margin-inline: calc(-1 * var(--gutter-l)) calc(-1 * var(--gutter-r));
+  padding: calc(22px + env(safe-area-inset-top, 0px)) var(--gutter-r) 64px var(--gutter-l);
+  background: radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--kerze-glanz) 22%, transparent), transparent 55%),
+    linear-gradient(180deg, var(--himmel-a), var(--himmel-b) 62%, var(--himmel-c)); }
+.kopf::before, .kopf::after { content: ""; position: absolute; inset: -80px 0 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .9) 0 1.6px, transparent 2.2px), radial-gradient(circle, rgba(255, 255, 255, .55) 0 1.1px, transparent 1.6px);
+  background-size: 74px 74px, 41px 41px; background-position: 0 0, 19px 27px; animation: schnee 18s linear infinite; }
+.kopf::after { background-size: 113px 113px, 57px 57px; background-position: 31px 9px, 7px 40px; opacity: .6; animation-name: schnee2; animation-duration: 28s; }
+@keyframes schnee { to { background-position: 0 74px, 19px 68px; } }
+@keyframes schnee2 { to { background-position: 31px 122px, 7px 97px; } }
+.kopf .wrap { position: relative; z-index: 1; }
+.kopf .eyebrow { font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: rgba(251, 241, 223, .78); }
+.kopf h1 { font-family: var(--f-titel); font-weight: 600; font-size: clamp(50px, 14vw, 72px); letter-spacing: .01em; line-height: 1; margin-top: 4px;
+  color: #f3d27a; text-shadow: 0 2px 0 rgba(0, 0, 0, .25), 0 0 26px rgba(243, 210, 122, .35); }
+.kopf .hallo { margin-top: 8px; font-size: 20px; }
+.kopf-zeile { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.stern-deko { width: 44px; height: 44px; color: var(--kerze); flex: none; margin-bottom: 6px; }
+.kopf .stern-deko { width: 50px; height: 50px; color: #f3d27a; filter: drop-shadow(0 0 10px rgba(243, 210, 122, .8)); animation: funkeln 3.2s ease-in-out infinite; }
+@keyframes funkeln { 50% { transform: scale(1.08) rotate(6deg); filter: drop-shadow(0 0 18px rgba(243, 210, 122, 1)); } }
+.berge { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 58px; z-index: 1; display: block; }
+.berge .hinten { fill: rgba(251, 241, 223, .16); }
+.berge .vorne { fill: var(--bg); }
+
+/* ── Karten & Knöpfe ── */
+.karte { background: var(--flaeche); border-radius: var(--r); box-shadow: var(--schatten); padding: 18px; }
+.knopf {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 58px; padding: 12px 22px; border-radius: 14px; border: 0;
+  background: var(--tanne); color: var(--auf-tanne); font-weight: 700; font-size: 20px; text-decoration: none;
+  transition: transform .12s ease, background .2s;
+}
+.knopf:hover { background: var(--tanne-hell); }
+.knopf:active { transform: scale(.98); }
+.knopf[disabled] { opacity: .45; cursor: default; transform: none; }
+.knopf.breit { width: 100%; }
+.knopf svg, .heute h2 svg, .gespeichert svg { width: 24px; height: 24px; flex: none; vertical-align: -3px; }
+.knopf.gold { background: var(--kerze); color: #1b1408; }
+.knopf.gold:hover { background: var(--kerze-glanz); }
+.knopf.zart { background: transparent; color: var(--tanne); box-shadow: inset 0 0 0 2px var(--linie); }
+.knopf.zart:hover { box-shadow: inset 0 0 0 2px var(--tanne); }
+.knopf.klein { min-height: 46px; font-size: 17px; padding: 8px 16px; }
+.textknopf { background: none; border: 0; padding: 8px 4px; color: var(--tanne); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+.abzeichen { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 12px; font-size: 15px; font-weight: 700; background: var(--bg-tief); color: var(--tinte); }
+.abzeichen.special { background: var(--band); color: #fff; }
+.abzeichen.gold { background: var(--kerze); color: #1b1408; }
+.abzeichen.insider { background: transparent; box-shadow: inset 0 0 0 2px var(--kerze); color: var(--tinte); }
+
+/* ── Heute-Karte ── */
+.heute { margin-top: -22px; display: grid; gap: 14px; position: relative; overflow: hidden; z-index: 2; border-top: 5px solid var(--kerze); }
+.heute h2 { color: var(--tanne); }
+.heute .datum { font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--leise); }
+.heute h2 { font-family: var(--f-zier); font-weight: 800; font-size: 30px; }
+.heute .unter { font-size: 18px; }
+.countdown { font-family: var(--f-mono); font-size: 32px; font-weight: 500; color: var(--tanne); }
+.fortschritt { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 16px; color: var(--leise); }
+.fortschritt .punktreihe { display: flex; gap: 5px; }
+.fortschritt .punktreihe i { width: 14px; height: 14px; border-radius: 50%; background: var(--linie); display: block; }
+.fortschritt .punktreihe i.an { background: var(--kerze); }
+
+/* ── Kalender-Raster: bemaltes Brett mit Türchen ── */
+.abschnitt { margin-top: 30px; }
+.abschnitt > h2 { font-family: var(--f-zier); font-weight: 800; font-size: 26px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+.abschnitt > h2::after { content: ""; flex: 1; height: 2px; border-radius: 1px; background: linear-gradient(90deg, var(--kerze), transparent); opacity: .7; }
+.kalender { position: relative; aspect-ratio: 360 / 520; max-width: 460px; margin: 0 auto; border-radius: 18px;
+  background: #2b1238 url("szene.svg") center / 100% 100% no-repeat;
+  box-shadow: inset 0 0 0 3px rgba(243, 210, 122, .7), inset 0 0 0 6px rgba(43, 18, 56, .55), var(--schatten); }
+/* Türchen sind aus dem Bild „ausgestanzt“: gleiche Grafik, passend verschoben, mit Perforation */
+.tuerchen {
+  position: absolute; border: 0; padding: 0; border-radius: 4px; perspective: 500px;
+  background: transparent; color: var(--tinte); overflow: visible;
+}
+.tuerchen .innen { position: absolute; inset: 0; border-radius: 4px; display: grid; place-items: center; text-align: center;
+  background: radial-gradient(circle at 50% 35%, #fffaf0, #f1e3c8); color: #4a2c14; font-weight: 700; font-size: 17px; line-height: 1.15; padding: 2px;
+  box-shadow: inset 0 2px 8px rgba(60, 30, 10, .45); }
+.tuerchen .innen small { display: block; font-size: 11px; font-weight: 400; opacity: .8; }
+.tuerchen .innen svg { width: 28px; height: 28px; color: #8c2632; }
+.tuerchen .blatt {
+  position: absolute; inset: 0; border-radius: 4px; transform-origin: left center; transition: transform .6s cubic-bezier(.3, .7, .3, 1);
+  background: #2b1238 url("szene.svg") no-repeat; background-size: var(--bgs); background-position: var(--bgp);
+  outline: 1.5px dashed rgba(255, 246, 224, .7); outline-offset: -3px;
+  box-shadow: 0 0 0 1px rgba(30, 10, 25, .35), 0 1px 3px rgba(0, 0, 0, .35);
+  display: grid; place-items: center; backface-visibility: hidden;
+}
+.tuerchen .nr { font-family: var(--f-zier); font-weight: 800; font-size: clamp(22px, 6.6vw, 30px); line-height: 1; color: #fff6e0; font-variant-numeric: lining-nums;
+  text-shadow: 0 0 2px #2a0d18, 0 0 6px rgba(42, 13, 24, .9), 0 1px 1px #2a0d18; }
+.tuerchen.probe .nr { font-size: 17px; letter-spacing: .02em; }
+.tuerchen[data-tag="24"] .nr { font-size: clamp(30px, 9vw, 42px); color: #f6d98a; }
+.tuerchen .marke { position: absolute; top: 2px; right: 2px; font-size: 10px; font-weight: 700; line-height: 1; padding: 2px 4px; border-radius: 5px; background: #d9a93a; color: #2b1408; }
+.tuerchen .knauf { display: none; }
+.tuerchen.heute-offen .blatt { box-shadow: 0 0 0 2px var(--kerze-glanz), 0 0 16px var(--kerze-glanz); outline-color: #fff6e0; animation: glimmen 2.4s ease-in-out infinite; }
+.tuerchen.angelehnt .blatt { transform: rotateY(-40deg); }
+.tuerchen.offen .blatt { transform: rotateY(-100deg); }
+.tuerchen.verpasst .innen { background: #d9ccb8; color: #6f5e53; }
+.tuerchen:focus-visible { outline: none; }
+.tuerchen:focus-visible .blatt { outline: 3px solid var(--kerze-glanz); outline-offset: 0; }
+@keyframes glimmen { 50% { box-shadow: 0 0 0 2px var(--kerze-glanz), 0 0 26px var(--kerze-glanz); } }
+.kalender-hinweis { margin-top: 10px; text-align: center; font-size: 16px; color: var(--leise); }
+
+/* ── Gedicht ── */
+.gedicht { font-family: var(--f-zier); font-style: italic; font-size: 21px; line-height: 1.55; display: grid; gap: 2px; }
+.gedicht .fehlt { color: var(--linie); font-style: normal; letter-spacing: .3em; }
+.gedicht .neu { color: var(--kerze); }
+
+/* ── Türchen-Ansicht ── */
+.tueransicht { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: env(safe-area-inset-top, 0px) var(--gutter-r) calc(40px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+.tueransicht .leiste { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding-block: 10px; background: var(--bg); }
+.zurueck { display: inline-flex; align-items: center; gap: 6px; min-height: 50px; padding: 6px 14px 6px 8px; border-radius: 12px; border: 0;
+  background: var(--flaeche); box-shadow: var(--schatten); font-weight: 700; font-size: 18px; color: var(--tanne); }
+.tuerkopf { display: grid; gap: 10px; margin-block: 8px 18px; }
+.tuerkopf .eyebrow { font-size: 15px; letter-spacing: .07em; text-transform: uppercase; color: var(--leise); }
+.tuerkopf h2 { font-family: var(--f-zier); font-weight: 800; font-size: 34px; color: var(--tanne); }
+.christkind { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; font-family: var(--f-zier); font-style: italic; font-size: 21px; line-height: 1.45; }
+.christkind svg { width: 30px; height: 30px; color: var(--kerze); margin-top: 2px; }
+.stapel { display: grid; gap: 18px; }
+
+/* Fotos wie im Album */
+.foto { position: relative; background: var(--papier); padding: 10px 10px 12px; border-radius: 3px; box-shadow: var(--schatten); transform: rotate(-.6deg); margin: 6px 4px; }
+.foto:nth-of-type(even) { transform: rotate(.5deg); }
+.foto::before, .foto::after { content: ""; position: absolute; width: 30px; height: 30px; background: #2b2420; opacity: .85; z-index: 2; }
+.foto::before { top: 2px; left: 2px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+.foto::after { bottom: 2px; right: 2px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.foto img, .foto video { width: 100%; height: auto; border-radius: 1px; background: #ddd; }
+.lupe { position: absolute; right: 16px; top: 16px; z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(30, 14, 16, .62); color: #fff; display: grid; place-items: center; }
+.zs-zelle { position: relative; }
+.zs-zelle .lupe { right: 8px; top: 8px; width: 40px; height: 40px; }
+.zs-zelle .zs-bild { width: 100%; display: block; }
+.laden { aspect-ratio: 4 / 3; display: grid; place-items: center; color: #6b5d50; font-family: var(--f-zier); font-style: italic; font-size: 18px;
+  background: linear-gradient(100deg, #ece4d4 30%, #f7f1e4 50%, #ece4d4 70%); background-size: 300% 100%; animation: schimmer 1.6s linear infinite; }
+@keyframes schimmer { to { background-position: -150% 0; } }
+
+/* Fragekarten */
+.frage { display: grid; gap: 16px; }
+.frage .kopfzeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.frage .typ { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--leise); font-weight: 700; }
+.frage h3 { font-size: 23px; line-height: 1.3; font-weight: 700; }
+.optionen { display: grid; gap: 10px; }
+.option { text-align: left; min-height: 58px; padding: 12px 16px; border-radius: 12px; border: 2px solid var(--linie); background: var(--flaeche); font-size: 19px; font-weight: 700;
+  display: flex; gap: 12px; align-items: center; }
+.option .bst { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--bg-tief); font-size: 16px; }
+.option[aria-pressed="true"] { border-color: var(--tanne); background: color-mix(in srgb, var(--tanne) 12%, var(--flaeche)); }
+.option[aria-pressed="true"] .bst { background: var(--tanne); color: var(--auf-tanne); }
+.option.weg { opacity: .4; text-decoration: line-through; }
+.option.richtig { border-color: var(--gut); background: var(--gut-flaeche); }
+.option.falsch { border-color: var(--schlecht); background: var(--schlecht-flaeche); }
+.option[disabled] { cursor: default; }
+.aufdecken { display: grid; gap: 8px; }
+.stufen { display: flex; gap: 6px; }
+.stufen i { flex: 1; height: 8px; border-radius: 4px; background: var(--linie); }
+.stufen i.an { background: var(--kerze); }
+.punkteinfo { font-size: 16px; color: var(--leise); }
+
+.schaetzer { display: grid; grid-template-columns: 64px 1fr 64px; gap: 10px; align-items: center; }
+.schaetzer button { height: 64px; border-radius: 14px; border: 0; background: var(--bg-tief); font-size: 32px; font-weight: 700; }
+.schaetzer output { text-align: center; font-family: var(--f-mono); font-size: 42px; font-weight: 500; line-height: 1.1; }
+.schaetzer output small { display: block; font-family: var(--f-text); font-size: 16px; color: var(--leise); }
+input[type="range"] { width: 100%; accent-color: var(--tanne); height: 36px; }
+.zahleingabe { width: 100%; font-size: 20px; padding: 10px 14px; border-radius: 12px; border: 2px solid var(--linie); background: var(--flaeche); }
+
+.zeitstrahl { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.zs-bild { position: relative; border: 3px solid transparent; border-radius: 8px; padding: 0; background: var(--papier); overflow: hidden; }
+.zs-bild img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.zs-bild .nummer { position: absolute; left: 8px; top: 8px; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 700;
+  background: var(--kerze); color: #1b1408; box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
+.zs-bild.gewaehlt { border-color: var(--kerze); }
+.zs-bild .bst { position: absolute; right: 6px; bottom: 6px; background: rgba(30, 14, 16, .65); color: #fff; font-size: 14px; padding: 2px 8px; border-radius: 6px; }
+
+.tippandere { display: grid; gap: 10px; padding-top: 6px; border-top: 1px dashed var(--linie); }
+.tippandere .reihe { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.tippandere .reihe button { min-height: 52px; border-radius: 10px; border: 2px solid var(--linie); background: var(--flaeche); font-size: 21px; font-weight: 700; }
+.tippandere .reihe button[aria-pressed="true"] { border-color: var(--kerze); background: var(--kerze); color: #1b1408; }
+
+textarea { width: 100%; min-height: 110px; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--linie); background: var(--flaeche); font-size: 19px; }
+
+.joker { display: flex; gap: 8px; flex-wrap: wrap; }
+.jokerchip { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 6px 14px; border-radius: 999px; border: 2px dashed var(--kerze); background: transparent; font-weight: 700; font-size: 16px; }
+.jokerchip[disabled] { opacity: .4; cursor: default; }
+.jokerchip .anz { font-family: var(--f-mono); font-size: 14px; background: var(--kerze); color: #1b1408; border-radius: 999px; padding: 0 7px; }
+.jokerchip.aktiv { border-style: solid; background: var(--kerze); color: #1b1408; }
+.nachfrage { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--bg-tief); font-size: 17px; }
+.hinweisbox { padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--kerze) 16%, var(--flaeche)); font-size: 18px; display: grid; grid-template-columns: 26px 1fr; gap: 8px; }
+
+.gespeichert { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--gut-flaeche); color: var(--tinte); font-weight: 700; }
+.ergebnis { display: grid; gap: 12px; }
+.ergebnis .punkte { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.ergebnis .gross { font-family: var(--f-zier); font-weight: 800; font-size: 34px; color: var(--kerze); }
+.notiz { background: var(--papier); color: #2b2420; padding: 14px 16px; border-radius: 4px; box-shadow: var(--schatten); font-family: var(--f-zier); font-size: 20px; line-height: 1.45; transform: rotate(.3deg); }
+.notiz b { font-family: var(--f-text); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 4px; color: #6b5d50; }
+.alle { width: 100%; border-collapse: collapse; font-size: 17px; }
+.alle td { padding: 8px 6px; border-top: 1px solid var(--linie); vertical-align: top; }
+.alle td:last-child { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 700; }
+.alle .ok { color: var(--gut); }
+.alle .nein { color: var(--schlecht); }
+
+.verskarte { background: radial-gradient(circle, rgba(243, 210, 122, .18) 0 1px, transparent 1.6px) 0 0 / 18px 18px, linear-gradient(160deg, var(--brett), var(--brett-tief)); color: #fbf1df; border-radius: var(--r); padding: 20px; display: grid; gap: 8px; box-shadow: var(--schatten); }
+.verskarte .eyebrow { font-size: 14px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+.verskarte .vers { color: #f6dc9a;  font-family: var(--f-zier); font-style: italic; font-size: 25px; line-height: 1.35; }
+
+/* Türflügel-Animation */
+.fluegel { position: fixed; inset: 0; z-index: 60; pointer-events: none; perspective: 1400px; display: grid; grid-template-columns: 1fr 1fr; }
+.fluegel div { background:
+    repeating-linear-gradient(92deg, transparent 0 9px, var(--maserung) 9px 10px, transparent 10px 19px),
+    radial-gradient(ellipse at 40% 30%, var(--zirbe-hell), var(--zirbe) 75%);
+  box-shadow: inset 0 0 0 6px rgba(0, 0, 0, .08); transition: transform .9s cubic-bezier(.5, .05, .3, 1); display: grid; align-items: center; }
+.fluegel .l { transform-origin: left center; justify-items: end; }
+.fluegel .r { transform-origin: right center; justify-items: start; }
+.fluegel span { font-family: var(--f-zier); font-weight: 800; font-size: 120px; color: var(--nr); line-height: 1; }
+.fluegel .l span { margin-right: -.3em; }
+.fluegel .r span { margin-left: -.3em; visibility: hidden; }
+.fluegel.auf .l { transform: rotateY(-105deg); }
+.fluegel.auf .r { transform: rotateY(105deg); }
+
+/* ── Rangliste ── */
+.umschalter { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; border-radius: 14px; background: var(--bg-tief); margin-bottom: 14px; }
+.umschalter button { min-height: 48px; border: 0; border-radius: 10px; background: transparent; font-weight: 700; font-size: 18px; }
+.umschalter button[aria-pressed="true"] { background: var(--flaeche); box-shadow: var(--schatten); }
+.rang { display: grid; gap: 10px; }
+.rangzeile { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; background: var(--flaeche); border-radius: 14px; padding: 12px 14px; box-shadow: var(--schatten); }
+.rangzeile.ich { box-shadow: inset 0 0 0 3px var(--kerze), var(--schatten); }
+.rangzeile .platz { width: 44px; height: 44px; display: grid; place-items: center; font-family: var(--f-zier); font-weight: 800; font-size: 24px; position: relative; }
+.rangzeile .platz svg { position: absolute; inset: 0; width: 44px; height: 44px; }
+.rangzeile .platz b { position: relative; font-size: 17px; color: #1b1408; margin-top: 3px; }
+.rangzeile .name { font-weight: 700; font-size: 20px; min-width: 0; }
+.rangzeile .name small { display: block; font-weight: 400; font-size: 15px; color: var(--leise); }
+.rangzeile .wert { text-align: right; font-family: var(--f-mono); font-size: 26px; font-weight: 500; line-height: 1.1; }
+.rangzeile .wert small { display: block; font-family: var(--f-text); font-size: 14px; color: var(--leise); }
+.balken { grid-column: 2 / -1; height: 6px; border-radius: 3px; background: var(--bg-tief); overflow: hidden; }
+.balken i { display: block; height: 100%; background: var(--tanne); border-radius: 3px; }
+.trend-auf { color: var(--gut); }
+.trend-ab { color: var(--schlecht); }
+
+/* ── Regeln ── */
+.regeln { display: grid; gap: 14px; }
+.regeln h3 { font-family: var(--f-zier); font-weight: 800; font-size: 23px; margin-top: 8px; }
+.regeln ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.regeltabelle { width: 100%; border-collapse: collapse; font-size: 17px; }
+.regeltabelle td { padding: 7px 4px; border-top: 1px solid var(--linie); }
+.regeltabelle td:last-child { text-align: right; font-weight: 700; white-space: nowrap; }
+
+/* ── Navigation unten ── */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--flaeche); box-shadow: 0 -2px 14px rgba(0, 0, 0, .12);
+  padding: 6px var(--gutter-r) calc(6px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+.nav .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.nav button { min-height: 60px; border: 0; background: transparent; border-radius: 12px; display: grid; justify-items: center; gap: 2px; font-size: 15px; font-weight: 700; color: var(--leise); }
+.nav button svg { width: 26px; height: 26px; }
+.nav button[aria-current="page"] { color: var(--tanne); background: color-mix(in srgb, var(--tanne) 10%, transparent); }
+
+/* ── Sonstiges ── */
+.toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + 20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 90;
+  background: var(--tinte); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-size: 17px; max-width: min(92vw, 520px); box-shadow: var(--schatten); text-align: center; }
+.lightbox { position: fixed; inset: 0; z-index: 95; background: rgba(12, 6, 8, .94); display: grid; place-items: center; padding: 16px; overflow: auto; }
+.lightbox img { max-height: 92vh; width: auto; max-width: 100%; touch-action: pinch-zoom; }
+.lightbox button { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); min-height: 50px; padding: 8px 16px; border-radius: 12px; border: 0; background: #fff; color: #111; font-weight: 700; font-size: 18px; }
+.meldung { margin-top: 40px; text-align: center; display: grid; gap: 16px; justify-items: center; }
+.meldung h2 { font-family: var(--f-zier); font-weight: 800; font-size: 30px; }
+.spinner { width: 44px; height: 44px; border-radius: 50%; border: 4px solid var(--linie); border-top-color: var(--kerze); animation: dreh 1s linear infinite; }
+@keyframes dreh { to { transform: rotate(360deg); } }
+.zeile { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.trenner { height: 1px; background: var(--linie); margin-block: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ── Admin ── */
+.admin .kopf h1 { font-size: 40px; }
+.admin-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-block: 8px 16px; }
+.admin-tabs button { min-height: 46px; padding: 6px 14px; border-radius: 10px; border: 0; background: var(--bg-tief); font-weight: 700; font-size: 16px; }
+.admin-tabs button[aria-pressed="true"] { background: var(--tanne); color: var(--auf-tanne); }
+.tabelle-wrap { overflow-x: auto; }
+.tabelle { border-collapse: collapse; font-size: 16px; width: 100%; }
+.tabelle th, .tabelle td { padding: 7px 8px; border-bottom: 1px solid var(--linie); text-align: left; white-space: nowrap; }
+.tabelle th { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--leise); }
+.tabelle td.r, .tabelle th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.vorlage { width: 100%; min-height: 220px; font-family: var(--f-text); font-size: 16px; }
+.feld { display: grid; gap: 4px; font-size: 15px; color: var(--leise); }
+.feld input, .feld select { font-size: 18px; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--linie); background: var(--flaeche); color: var(--tinte); min-height: 50px; }
+.formular { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); align-items: end; }
+.statuspunkt { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--linie); vertical-align: middle; margin-right: 6px; }
+.statuspunkt.gelb { background: var(--kerze-glanz); }
+.statuspunkt.gruen { background: var(--gut); }
+.loesung-markiert { outline: 3px solid var(--gut); }
+.rangbild { width: 100%; max-width: 420px; border-radius: 10px; box-shadow: var(--schatten); }
+
+/* ── Demo-Leiste ── */
+.demo-knopf { position: fixed; z-index: 80; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px));
+  min-height: 48px; padding: 6px 16px; border-radius: 999px; border: 0; background: var(--band); color: #fff; font-weight: 700; font-size: 16px; box-shadow: var(--schatten); }
+.demo-panel { position: fixed; z-index: 85; left: var(--gutter-l); right: var(--gutter-r); bottom: calc(var(--nav-h) + 72px + env(safe-area-inset-bottom, 0px));
+  max-width: 560px; margin: 0 auto; max-height: 70vh; overflow-y: auto; background: var(--flaeche); border-radius: 16px; box-shadow: 0 10px 40px rgba(0, 0, 0, .35); padding: 16px; display: grid; gap: 12px; font-size: 16px; }
+.demo-panel h3 { font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--leise); }
+.demo-panel .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-panel .chips button { min-height: 42px; padding: 4px 12px; border-radius: 10px; border: 2px solid var(--linie); background: var(--flaeche); font-weight: 700; font-size: 15px; }
+.demo-panel .chips button[aria-pressed="true"] { border-color: var(--tanne); background: var(--tanne); color: var(--auf-tanne); }
+.demo-panel .uhr { font-family: var(--f-mono); font-size: 18px; }
