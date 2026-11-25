@@ -209,6 +209,7 @@ p { margin: 0; }
 .foto::before { top: 2px; left: 2px; clip-path: polygon(0 0, 100% 0, 0 100%); }
 .foto::after { bottom: 2px; right: 2px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 .foto img, .foto video { width: 100%; height: auto; border-radius: 1px; background: #ddd; }
+.foto video { max-height: 62vh; object-fit: contain; background: #1b0f12; }
 .lupe { position: absolute; right: 16px; top: 16px; z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(30, 14, 16, .62); color: #fff; display: grid; place-items: center; }
 .zs-zelle { position: relative; }
 .zs-zelle .lupe { right: 8px; top: 8px; width: 40px; height: 40px; }
@@ -380,3 +381,5 @@ textarea { width: 100%; min-height: 110px; padding: 12px 14px; border-radius: 12
 .demo-panel .chips button { min-height: 42px; padding: 4px 12px; border-radius: 10px; border: 2px solid var(--linie); background: var(--flaeche); font-weight: 700; font-size: 15px; }
 .demo-panel .chips button[aria-pressed="true"] { border-color: var(--tanne); background: var(--tanne); color: var(--auf-tanne); }
 .demo-panel .uhr { font-family: var(--f-mono); font-size: 18px; }
+
+input.freitext { width: 100%; padding: 14px 16px; border-radius: 12px; border: 2px solid var(--linie); background: var(--flaeche); font-size: 20px; }

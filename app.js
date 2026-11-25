@@ -4,7 +4,7 @@
   var W = window.WN, esc = W.esc, el = W.el, I = W.ICON;
   var S = { token: null, stand: null, ansicht: 'kalender', rang: 'einzel', tuer: null, tag: null, entwurf: {}, nachfrage: null, laeuft: false };
   var app, uhr;
-  var TYPNAME = { auswahl: 'Rätselfrage', schaetzen: 'Schätzfrage', dalli: 'Dalli Klick', zoom: 'Zoom-Rätsel', zeitstrahl: 'Zeitstrahl', video: 'Video-Stopp', frei: 'Freitext' };
+  var TYPNAME = { auswahl: 'Rätselfrage', schaetzen: 'Schätzfrage', dalli: 'Dalli Klick', zoom: 'Zoom-Rätsel', zeitstrahl: 'Zeitstrahl', video: 'Video-Stopp', frei: 'Freitext', lied: 'Lied-Rätsel' };
   var BST = 'ABCDEFGH';
   var weniger = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -78,6 +78,13 @@
   }
 
   /* ───────── Kalender ───────── */
+  // Proberunden haben die Nummern 0, -1, …: die früheste ist „Proberunde 1“
+  function tuerName(t) {
+    if (t.tag > 0) return 'Türchen ' + t.tag;
+    var proben = S.stand.tueren.filter(function (x) { return x.tag <= 0; });
+    return proben.length > 1 ? 'Proberunde ' + (proben.findIndex(function (x) { return x.tag === t.tag; }) + 1) : 'Probetürchen';
+  }
+
   function heuteTuer() {
     var iso = W.heuteIso(), tt = S.stand.tueren;
     return tt.find(function (t) { return t.datum === iso; }) || tt.find(function (t) { return t.status === 'zu'; }) || tt[tt.length - 1];
@@ -85,7 +92,7 @@
 
   function zeichneKalender(ziel) {
     var st = S.stand, h = heuteTuer(), j = W.jetzt();
-    var name = h.tag === 0 ? 'Probetürchen' : 'Türchen ' + h.tag;
+    var name = tuerName(h);
     var karte = '';
     var specialHtml = h.special ? '<span class="abzeichen special">' + esc(h.special) + (h.faktor > 1 ? ' · Punkte ×' + h.faktor : '') + '</span>' : '';
     if (h.status === 'zu') {
@@ -94,8 +101,8 @@
         '<h2>' + name + (heute ? ' öffnet um ' + st.oeffnen + ' Uhr' : ' kommt bald') + '</h2>' + specialHtml +
         '<p class="unter">Das Christkindl ist noch nicht so weit. Noch</p>' +
         '<p class="countdown" data-countdown="' + h.oeffnet + '">' + W.dauer(h.oeffnet - j) + '</p>';
-      var probe = st.tueren.find(function (t) { return t.tag === 0; });
-      if (probe && probe.status === 'offen') karte += '<button class="knopf zart breit" type="button" data-tag="0">Probetürchen ausprobieren</button>';
+      var probe = st.tueren.filter(function (t) { return t.tag <= 0 && t.status === 'offen'; }).pop();
+      if (probe) karte += '<button class="knopf zart breit" type="button" data-tag="' + probe.tag + '">' + tuerName(probe) + ' ausprobieren</button>';
     } else if (h.status === 'offen') {
       karte = '<p class="datum">' + esc(W.fmtDatum(h.datum)) + '</p><h2>' + name + ' ist offen!</h2>' + specialHtml +
         (h.titel ? '<p class="unter">„' + esc(h.titel) + '“</p>' : '') +
@@ -115,7 +122,10 @@
       if (naechste) karte += '<p class="leise">Nächstes Türchen: ' + esc(W.fmtDatum(naechste.datum)) + ', ' + st.oeffnen + ' Uhr.</p>';
     }
 
-    var tueren = st.tueren.map(function (t) { return tuerchenHtml(t, t.tag === h.tag); }).join('');
+    // Im Bild ist nur ein Platz für die Probe: die letzte schon geöffnete Proberunde, sonst die erste
+    var proben = st.tueren.filter(function (t) { return t.tag <= 0; });
+    var probeZeigen = proben.filter(function (t) { return t.status !== 'zu'; }).pop() || proben[0];
+    var tueren = st.tueren.filter(function (t) { return t.tag > 0 || t === probeZeigen; }).map(function (t) { return tuerchenHtml(t, t.tag === h.tag); }).join('');
     ziel.innerHTML =
       '<section class="karte heute" aria-live="polite">' + karte + '</section>' +
       '<section class="abschnitt"><h2>Der Kalender</h2><div class="kalender">' + tueren + '</div>' +
@@ -144,16 +154,16 @@
       else if (t.mitgespielt) { innen = '<span class="zahl">+' + t.punkte + '<small>Punkte</small></span>'; zustand = t.punkte + ' Punkte'; }
       else { cls += ' verpasst'; innen = '<span>–<small>verpasst</small></span>'; zustand = 'verpasst'; }
     }
-    if (t.tag === 0) cls += ' probe';
-    var nr = t.tag === 0 ? 'Probe' : t.tag;
+    if (t.tag <= 0) cls += ' probe';
+    var nr = t.tag <= 0 ? 'Probe' : t.tag;
     var marke = t.faktor > 1 ? '<span class="marke">×' + t.faktor + '</span>' : '';
-    var P = (window.WN_TUERPLAN || {})[t.tag], stil = '';
+    var P = (window.WN_TUERPLAN || {})[Math.max(t.tag, 0)], stil = '';
     if (P) {
       stil = ' style="left:' + P[0] + '%;top:' + P[1] + '%;width:' + P[2] + '%;height:' + P[3] + '%;' +
         '--bgs:' + (10000 / P[2]).toFixed(2) + '% ' + (10000 / P[3]).toFixed(2) + '%;' +
         '--bgp:' + (P[0] / (100 - P[2]) * 100).toFixed(2) + '% ' + (P[1] / (100 - P[3]) * 100).toFixed(2) + '%"';
     }
-    return '<button type="button" class="' + cls + '" data-tag="' + t.tag + '"' + stil + ' aria-label="' + (t.tag === 0 ? 'Probetürchen' : 'Türchen ' + t.tag) + ', ' + zustand + '">' +
+    return '<button type="button" class="' + cls + '" data-tag="' + t.tag + '"' + stil + ' aria-label="' + tuerName(t) + ', ' + zustand + '">' +
       '<span class="innen">' + innen + '</span><span class="blatt"><span class="nr">' + nr + '</span><span class="knauf"></span>' + marke + '</span></button>';
   }
 
@@ -174,7 +184,7 @@
     var t = S.stand.tueren.find(function (x) { return x.tag === tag; });
     if (!t) return;
     if (t.status === 'zu') {
-      W.toast((tag === 0 ? 'Das Probetürchen' : 'Türchen ' + tag) + ' öffnet am ' + W.fmtDatumKurz(t.datum) + ' um ' + S.stand.oeffnen + ' Uhr.');
+      W.toast((tag <= 0 ? 'Die ' + tuerName(t) : 'Türchen ' + tag) + ' öffnet am ' + W.fmtDatumKurz(t.datum) + ' um ' + S.stand.oeffnen + ' Uhr.');
       return;
     }
     oeffneTuer(tag, !t.geoeffnet);
@@ -221,16 +231,17 @@
   /* ───────── Regeln ───────── */
   function zeichneRegeln(ziel) {
     var st = S.stand;
-    var ausgleich = st.spieler.filter(function (s) { return s.ausgleich > 1; }).map(function (s) { return esc(s.name) + ' ×' + zahl(s.ausgleich); }).join(', ');
+    var ausgleich = st.spieler.filter(function (s) { return s.ausgleich > 1; }).map(function (s) { return esc(s.name) + ' ×' + zahl(s.ausgleich) + (s.ausgleichAlle ? ' (bei allen Fragen)' : ''); }).join(', ');
     var j = st.joker || {};
     ziel.innerHTML = '<section class="abschnitt regeln" style="margin-top:14px"><h2 style="font-family:var(--f-zier);font-weight:800;font-size:28px">So geht\'s</h2>' +
       '<div class="karte regeln"><ul>' +
-      '<li>Jeden Tag ab <b>' + st.oeffnen + ' Uhr</b> geht ein Türchen auf – mit einem alten Familienfoto und einer Frage.</li>' +
+      '<li>Jeden Tag ab <b>' + st.oeffnen + ' Uhr</b> geht ein Türchen auf – mit alten Familienfotos und ein paar Fragen dazu.</li>' +
       '<li>Du kannst raten, wann du willst – bis <b>' + st.schluss + ' Uhr</b>.</li>' +
       '<li>Die Auflösung kommt um ' + st.schluss + ' Uhr. Wenn alle früher fertig sind, auch früher.</li>' +
       '<li>Ein verpasstes Türchen kannst du später noch anschauen, es gibt dann nur keine Punkte mehr.</li>' +
+      '<li>Hat ein Türchen mehrere Fragen, kommt die nächste, sobald du die vorige abgeschickt hast.</li>' +
       '<li>Jeder sieht die Antworten in einer anderen Reihenfolge. „Es war B“ verrät also nichts 😉</li></ul></div>' +
-      '<h3>Punkte</h3><div class="karte"><table class="regeltabelle"><tbody>' +
+      '<h3>Punkte</h3><div class="karte">' + (st.punkteProTuer ? '<p style="margin-bottom:10px">Jedes Türchen ist <b>bis zu ' + st.punkteProTuer + ' Punkte</b> wert – egal ob es eine Frage hat oder vier. Die Punkte werden auf die Fragen des Tages aufgeteilt; die Tabelle zeigt, wie viel welche Frage im Verhältnis bringt.</p>' : '') + '<table class="regeltabelle"><tbody>' +
       '<tr><td>Richtige Antwort</td><td>10</td></tr>' +
       '<tr><td>Dalli Klick &amp; Zoom-Rätsel: sofort richtig</td><td>bis 15</td></tr>' +
       '<tr><td>… jedes Aufdecken kostet etwas</td><td>−2 bis −5</td></tr>' +
@@ -240,11 +251,17 @@
       '<tr><td>… um eins daneben</td><td>+2</td></tr>' +
       '<tr><td>Sonntags-Specials &amp; Feiertag</td><td>×2</td></tr>' +
       '<tr><td>Großes Finale am 24.</td><td>×3</td></tr></tbody></table></div>' +
-      '<h3>Fairer Ausgleich</h3><div class="karte"><p>Manche Fragen sind <span class="abzeichen insider">Insider-Fragen</span> – die kann nur wissen, wer damals dabei war. Damit alle eine Chance haben, zählen sie für manche mehr: <b>' + (ausgleich || '–') + '</b>.</p></div>' +
+      (!insiderZaehlt() ? (ausgleich ? '<h3>Fairer Ausgleich</h3><div class="karte"><p>Für alle zählt jede Frage gleich viel. Nur eine Ausnahme: <b>' + ausgleich + '</b>.</p></div>' : '') :
+      '<h3>Fairer Ausgleich</h3><div class="karte"><p>Manche Fragen sind <span class="abzeichen insider">Insider-Fragen</span> – die kann nur wissen, wer damals dabei war. Damit alle eine Chance haben, zählen sie für manche mehr: <b>' + (ausgleich || '–') + '</b>.</p></div>') +
       '<h3>Joker</h3><div class="karte"><ul>' +
-      '<li><b>50:50</b> (' + (j.fifty || 0) + '×): Zwei falsche Antworten verschwinden.</li>' +
-      '<li><b>Christkindl-Tipp</b> (' + (j.tipp || 0) + '×): Ein kleiner Hinweis zur Frage.</li>' +
-      '<li><b>Doppelt</b> (' + (j.doppelt || 0) + '×): Alle Punkte eines Türchens zählen doppelt. Am Finale-Tag besonders spannend …</li>' +
+      '<li><b>50:50</b> (' + ((j.fifty && j.fifty.gesamt) || 0) + '×): Zwei falsche Antworten verschwinden.</li>' +
+      (function () {
+        var hat = st.spieler.filter(function (s) { return s.joker && s.joker.tipp > 0; }).map(function (s) { return esc(s.name); });
+        var meins = j.tipp && j.tipp.gesamt > 0;
+        if (!hat.length) return '<li><b>Christkindl-Tipp</b> (' + ((j.tipp && j.tipp.gesamt) || 0) + '×): Ein kleiner Hinweis zur Frage.</li>';
+        return '<li><b>Christkindl-Tipp</b>' + (meins ? ' (' + j.tipp.gesamt + '×)' : '') + ': Ein kleiner Hinweis zur Frage. ' + (meins ? 'Den gibt’s nur für dich – ein kleiner Vorsprung vom Christkindl!' : 'Den bekommt nur ' + hat.join(' und ') + ' – ein kleiner Vorsprung vom Christkindl.') + '</li>';
+      })() +
+      '<li><b>Doppelt</b> (' + ((j.doppelt && j.doppelt.gesamt) || 0) + '×): Alle Punkte eines Türchens zählen doppelt. Am Finale-Tag besonders spannend …</li>' +
       '<li>Im Probetürchen sind alle Joker gratis zum Ausprobieren.</li></ul></div>' +
       '<h3>Zwei Wertungen</h3><div class="karte"><p>Jeder spielt für sich. Zusätzlich werden die Punkte der Teams zusammengezählt: ' +
       st.teams.map(function (t) { return '<b>' + esc(t.name) + '</b>'; }).join(' gegen ') + '.</p></div>' +
@@ -329,7 +346,7 @@
   function zeichneTuer() {
     var r = S.tuer, t = r.tuer, st = r.stand, auf = r.aufgeloest;
     var scroll = ansicht.scrollTop;
-    var name = t.tag === 0 ? 'Probetürchen' : 'Türchen ' + t.tag;
+    var name = tuerName(t);
     var kopf = '<header class="tuerkopf"><p class="eyebrow">' + name + ' · ' + esc(W.fmtDatum(t.datum)) + '</p>' +
       '<h2>' + esc(t.titel) + '</h2>' +
       (t.special || t.faktor > 1 ? '<div class="zeile">' + (t.special ? '<span class="abzeichen special">' + esc(t.special) + '</span>' : '') + (t.faktor > 1 ? '<span class="abzeichen gold">Alle Punkte ×' + t.faktor + '</span>' : '') + '</div>' : '') +
@@ -341,7 +358,9 @@
     if (t.bonus) oben += '<div class="hinweisbox"><span>🎁</span><span><b>Bonusaufgabe:</b> ' + esc(t.bonus) + '</span></div>';
     if (auf && !st.fertig && t.wertung) oben += '<div class="hinweisbox"><span>🕯️</span><span>Dieses Türchen ist schon aufgelöst. Anschauen geht noch – Punkte gibt es dafür keine mehr.</span></div>';
 
-    var fragen = t.fragen.map(function (q, i) { return frageHtml(q, i, t.fragen.length); }).join('');
+    var fragen = t.fragen.map(function (q, i) { return frageHtml(q, i, t.anzahl || t.fragen.length); }).join('');
+    var nochOffen = (t.anzahl || t.fragen.length) - t.fragen.length;
+    if (nochOffen > 0 && !auf) fragen += '<p class="punkteinfo" style="text-align:center">' + (nochOffen === 1 ? 'Noch 1 Frage' : 'Noch ' + nochOffen + ' Fragen') + ' – die nächste kommt, sobald du abgeschickt hast.</p>';
 
     var unten = '';
     if (st.fertig && !auf) {
@@ -362,11 +381,12 @@
 
   function versHtml(vers, t) {
     if (!vers) return '';
-    var titel = t.tag === 0 ? 'Das Christkindl-Gedicht' : 'Zeile ' + t.tag + ' vom Christkindl-Gedicht';
+    var titel = t.tag <= 0 ? 'Das Christkindl-Gedicht' : 'Zeile ' + t.tag + ' vom Christkindl-Gedicht';
     return '<div class="verskarte"><p class="eyebrow">' + titel + '</p><p class="vers">' + esc(vers) + '</p></div>';
   }
 
   function jokerRest(art) {
+    if (S.stand.joker[art] && S.stand.joker[art].gesamt === 0) return { uebrig: 0, keiner: true };
     if (!S.tuer.tuer.wertung) return { uebrig: 9, probe: true };
     var j = S.stand.joker[art] || { uebrig: 0 };
     return { uebrig: j.uebrig, probe: false };
@@ -394,25 +414,32 @@
     return '<figure class="foto" style="margin:6px 4px" data-medium="' + esc(name) + '" data-alt="' + esc(alt || 'Foto') + '"' + (extra || '') + '><div class="laden">Das Christkindl packt aus …</div></figure>';
   }
 
+  // Insider-Fragen sind nur ein Thema, wenn jemand genau dort einen Ausgleich hat
+  function insiderZaehlt() { return S.stand.spieler.some(function (s) { return s.ausgleich > 1 && !s.ausgleichAlle; }); }
+
   function frageHtml(q, idx, anzahl) {
     var r = S.tuer, st = r.stand, auf = r.aufgeloest, beantwortet = st.antworten[q.id], gesperrt = auf || !!beantwortet;
     var e = entwurf(q), a = beantwortet || e;
     var kopf = '<div class="kopfzeile"><span class="typ">' + (anzahl > 1 ? 'Frage ' + (idx + 1) + ' von ' + anzahl + ' · ' : '') + TYPNAME[q.typ] + '</span>' +
-      (q.insider ? '<span class="abzeichen insider" title="Für manche zählt diese Frage mehr">Insider-Frage</span>' : '') + '</div>';
+      (q.insider && insiderZaehlt() ? '<span class="abzeichen insider" title="Für manche zählt diese Frage mehr">Insider-Frage</span>' : '') + '</div>';
     var medien = '', eingabe = '', joker = '';
     var m = q.medien;
 
-    if (q.typ === 'dalli' || q.typ === 'zoom') {
+    if (q.typ === 'dalli' || q.typ === 'zoom' || q.typ === 'lied') {
       var schritte = st.schritte[q.id] || 0, n = m.stufen.length;
       var zeige = gesperrt && m.danach[0] && r.schluessel[m.danach[0]] ? m.danach[0] : m.stufen[Math.min(schritte, n - 1)];
-      medien = fotoHtml(zeige, TYPNAME[q.typ]);
+      var WORT = { dalli: ['Aufdecken', 'Ein Stück mehr aufdecken'], zoom: ['Rauszoomen', 'Weiter rauszoomen'], lied: ['Weiterhören', 'Ein Stück weiter anhören'] }[q.typ];
+      medien = q.typ === 'lied'
+        ? (gesperrt ? '<p class="punkteinfo"><b>Hier das ganze Video:</b></p>' : '<p class="punkteinfo">Du hörst die ersten ' + (q.liedSek ? q.liedSek[Math.min(schritte, n - 1)] : '') + ' Sekunden.</p>') +
+          '<figure class="foto" data-medium="' + esc(zeige) + '" data-poster="' + esc(q.video ? q.video.poster : '') + '" data-video="1"><div class="laden">Das Christkindl legt den Film ein …</div></figure>'
+        : fotoHtml(zeige, TYPNAME[q.typ]);
       if (!gesperrt) {
         var jetztP = q.punkteStufen[Math.min(schritte, q.punkteStufen.length - 1)];
         var dannP = q.punkteStufen[Math.min(schritte + 1, q.punkteStufen.length - 1)];
         var balken = ''; for (var i = 0; i < n; i++) balken += '<i class="' + (i <= schritte ? 'an' : '') + '"></i>';
         medien += '<div class="aufdecken"><div class="stufen" aria-hidden="true">' + balken + '</div>' +
-          '<p class="punkteinfo">Wenn du jetzt richtig rätst: <b>' + jetztP + ' Punkte</b>' + (schritte < n - 1 ? ' · nach dem nächsten ' + (q.typ === 'dalli' ? 'Aufdecken' : 'Rauszoomen') + ': ' + dannP : '') + '</p>' +
-          (schritte < n - 1 ? '<button class="knopf zart breit" type="button" data-schritt="' + q.id + '">' + (q.typ === 'dalli' ? 'Ein Stück mehr aufdecken' : 'Weiter rauszoomen') + ' (−' + (jetztP - dannP) + ')</button>' : '<p class="punkteinfo">Mehr gibt es nicht aufzudecken.</p>') +
+          '<p class="punkteinfo">Wenn du jetzt richtig rätst: <b>' + jetztP + ' Punkte</b>' + (schritte < n - 1 ? ' · nach dem nächsten ' + WORT[0] + ': ' + dannP : '') + '</p>' +
+          (schritte < n - 1 ? '<button class="knopf zart breit" type="button" data-schritt="' + q.id + '">' + WORT[1] + ' (−' + (jetztP - dannP) + ')</button>' : '<p class="punkteinfo">Mehr gibt es nicht aufzudecken.</p>') +
           '</div>';
       } else if (beantwortet && !auf) {
         medien += '<p class="punkteinfo">Aufgedeckt: Stufe ' + (schritte + 1) + ' von ' + n + '.</p>';
@@ -423,15 +450,29 @@
       else medien = '<p class="punkteinfo"><b>So ging\'s weiter:</b></p><figure class="foto" data-medium="' + esc(r.schluessel[v.voll] ? v.voll : v.teil1) + '" data-poster="' + esc(v.poster) + '" data-video="1"><div class="laden">Das Christkindl legt den Film ein …</div></figure>';
     } else if (q.typ === 'zeitstrahl') {
       medien = '';
+    } else if (q.video && q.video.voll) {
+      medien = '<figure class="foto" data-medium="' + esc(q.video.voll) + '" data-poster="' + esc(q.video.poster) + '" data-video="1"><div class="laden">Das Christkindl legt den Film ein …</div></figure>';
     } else if (m.start && m.start[0]) {
-      medien = fotoHtml(m.start[0], 'Foto zur Frage');
+      medien = m.start.length === 1 ? fotoHtml(m.start[0], 'Foto zur Frage') : m.start.map(function (n, i) {
+        return '<p class="punkteinfo"><b>Foto ' + (i + 1) + '</b></p>' + fotoHtml(n, 'Foto ' + (i + 1));
+      }).join('');
     }
 
     // Eingabe
-    if (['auswahl', 'video', 'dalli', 'zoom'].indexOf(q.typ) >= 0) {
+    if (q.sprung && q.sprung.t) {
+      var mm = Math.floor(q.sprung.t / 60), ss = ('0' + (q.sprung.t % 60)).slice(-2);
+      medien += '<button class="knopf zart breit" type="button" data-sprung="' + q.id + '|' + q.sprung.t + '">⏩ ' + esc(q.sprung.text || 'Direkt zur Stelle springen') + ' (' + mm + ':' + ss + ')</button>';
+    }
+
+    if (q.freitext) {
+      var lnF = auf ? r.aufloesung.fragen[q.id] : null;
+      eingabe = gesperrt
+        ? '<p>Deine Antwort: <b>„' + esc(beantwortet ? beantwortet.text : '–') + '“</b>' + (lnF ? ' · Gesucht war: <b>' + esc(lnF.richtig) + '</b>' : '') + '</p>'
+        : '<input type="text" class="freitext" id="t-' + q.id + '" data-text="' + q.id + '" maxlength="60" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Name eintippen …" aria-label="Deine Antwort" value="' + esc(e.text || '') + '">';
+    } else if (['auswahl', 'video', 'dalli', 'zoom', 'lied'].indexOf(q.typ) >= 0) {
       var weg = (st.joker[q.id] && st.joker[q.id].fifty) || [];
       var ln = auf ? r.aufloesung.fragen[q.id] : null;
-      var liste = W.mischen(q.optionen, S.token + '|' + S.tag + '|' + q.id);
+      var liste = q.fest ? q.optionen : W.mischen(q.optionen, S.token + '|' + S.tag + '|' + q.id);
       eingabe = '<div class="optionen" role="group" aria-label="Antworten">' + liste.map(function (o, i) {
         var cls = 'option', gedrueckt = a.wahl === o.id;
         if (weg.indexOf(o.id) >= 0) cls += ' weg';
@@ -506,12 +547,14 @@
 
   function jokerChip(qid, art, text) {
     var j = jokerRest(art);
+    if (j.keiner) return '';
     return '<button class="jokerchip" type="button" data-joker="' + qid + '|' + art + '"' + (j.uebrig > 0 ? '' : ' disabled') + '>' + text + ' <span class="anz">' + (j.probe ? 'gratis' : j.uebrig) + '</span></button>';
   }
 
   function gueltig(q) {
     var e = entwurf(q);
     if (q.tippAndere && e.tipp == null) return false;
+    if (q.freitext) return !!(e.text && e.text.trim());
     switch (q.typ) {
       case 'schaetzen': return e.zahl != null && !isNaN(e.zahl);
       case 'zeitstrahl': return e.reihenfolge.length === q.bilder.length;
@@ -522,6 +565,7 @@
 
   function antwortText(q, a) {
     if (!a) return '<span class="leise">nicht geraten</span>';
+    if (q.freitext) return '„' + esc(a.text) + '“';
     switch (q.typ) {
       case 'schaetzen': return esc(a.zahl + (q.einheit ? ' ' + q.einheit : ''));
       case 'zeitstrahl': return 'Reihenfolge';
@@ -619,6 +663,13 @@
       };
     });
     ansicht.querySelectorAll('[data-zs-reset]').forEach(function (b) { b.onclick = function () { var q = frageVon(b.dataset.zsReset); entwurf(q).reihenfolge = []; zeitstrahlMarken(q); }; });
+    ansicht.querySelectorAll('[data-sprung]').forEach(function (b) {
+      b.onclick = function () {
+        var teile = b.dataset.sprung.split('|'), v = ansicht.querySelector('#f-' + teile[0] + ' video');
+        if (!v) { W.toast('Das Video lädt noch – gleich nochmal probieren.'); return; }
+        v.currentTime = Number(teile[1]); v.play();
+      };
+    });
     ansicht.querySelectorAll('[data-schritt]').forEach(function (b) {
       b.onclick = function () { aktion({ a: 'schritt', t: S.token, tag: S.tag, q: b.dataset.schritt }); };
     });
@@ -635,7 +686,7 @@
         var q = frageVon(b.dataset.senden), e = entwurf(q), ant = {};
         if (q.typ === 'schaetzen') ant.zahl = e.zahl;
         else if (q.typ === 'zeitstrahl') ant.reihenfolge = e.reihenfolge.slice();
-        else if (q.typ === 'frei') ant.text = e.text;
+        else if (q.typ === 'frei' || q.freitext) ant.text = e.text;
         else ant.wahl = e.wahl;
         if (q.tippAndere) ant.tipp = e.tipp;
         aktion({ a: 'antwort' }, { a: 'antwort', t: S.token, tag: S.tag, q: q.id, antwort: ant }, 'Gespeichert ✓');

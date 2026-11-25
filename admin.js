@@ -4,7 +4,7 @@
   var W = window.WN, esc = W.esc, el = W.el, I = W.ICON;
   var A = { token: null, daten: null, tab: 'heute', vorschau: null, vorschauTag: null, rang: 'einzel', tuerCache: {} };
   var app;
-  var TYPNAME = { auswahl: 'Rätselfrage', schaetzen: 'Schätzfrage', dalli: 'Dalli Klick', zoom: 'Zoom-Rätsel', zeitstrahl: 'Zeitstrahl', video: 'Video-Stopp', frei: 'Freitext' };
+  var TYPNAME = { auswahl: 'Rätselfrage', schaetzen: 'Schätzfrage', dalli: 'Dalli Klick', zoom: 'Zoom-Rätsel', zeitstrahl: 'Zeitstrahl', video: 'Video-Stopp', frei: 'Freitext', lied: 'Lied-Rätsel' };
 
   async function start(token) {
     A.token = token;
@@ -58,7 +58,7 @@
     var offen = d.offeneBewertungen.filter(function (b) { return b.punkte == null; });
 
     ziel.innerHTML =
-      '<section class="karte stapel"><p class="leise">' + (h.tag === 0 ? 'Probetürchen' : 'Türchen ' + h.tag) + ' · ' + esc(W.fmtDatum(h.datum)) + ' · ' + status + '</p>' +
+      '<section class="karte stapel"><p class="leise">' + (h.tag <= 0 ? 'Proberunde (' + W.fmtDatumKurz(h.datum) + ')' : 'Türchen ' + h.tag) + ' · ' + esc(W.fmtDatum(h.datum)) + ' · ' + status + '</p>' +
       '<h2 style="font-family:var(--f-zier);font-weight:800;font-size:28px">' + esc(h.titel) + '</h2>' +
       '<div class="tabelle-wrap"><table class="tabelle"><thead><tr><th>Spieler</th><th>geöffnet</th><th>fertig</th><th class="r">Punkte</th></tr></thead><tbody>' + zeilen + '</tbody></table></div>' +
       '<p class="leise" style="font-size:15px">Gelb = geöffnet, grün = fertig. Auflösung automatisch um ' + W.fmtZeit(h.schliesst) + ' Uhr oder sobald alle fertig sind.</p></section>' +
@@ -109,7 +109,7 @@
   }
 
   function teaserText(h) {
-    var name = h.tag === 0 ? 'Das Probetürchen' : 'Türchen ' + h.tag;
+    var name = h.tag <= 0 ? 'Die Proberunde' : 'Türchen ' + h.tag;
     var text = h.teaser || ('🌟 ' + name + ' ist offen!');
     return text + '\n\nAb ' + W.fmtZeit(h.oeffnet) + ' Uhr geht\'s los, mitraten bis ' + W.fmtZeit(h.schliesst) + ' Uhr. Einfach euren persönlichen Link antippen 🕯️';
   }
@@ -127,6 +127,7 @@
     if (q.typ === 'schaetzen') return l.richtig + (q.einheit ? ' ' + q.einheit : '');
     if (q.typ === 'zeitstrahl') return 'die richtige Reihenfolge';
     if (q.typ === 'frei') return l.richtig || '(Freitext)';
+    if (q.freitext) return l.richtig;
     var o = q.optionen.find(function (x) { return x.id === l.richtig; });
     return o ? o.text : '?';
   }
@@ -141,7 +142,7 @@
     var karte = document.getElementById('ergebnis-karte');
     try {
       var r = await tuerDetails(tag), d = A.daten, t = r.tuer, a = r.aufloesung;
-      var name = tag === 0 ? 'Probetürchen' : 'Türchen ' + tag;
+      var name = tag <= 0 ? 'Proberunde' : 'Türchen ' + tag;
       var sieger = a.tageswertung.filter(function (x) { return x.platz === 1; });
       var zeilen = ['🌟 *' + d.titel + '* – Auflösung ' + name + (t.special ? ' (' + t.special + ')' : ''), ''];
       t.fragen.forEach(function (q, i) {
@@ -223,7 +224,7 @@
       '<div class="tabelle-wrap"><table class="tabelle"><thead><tr><th></th><th>Tag</th><th>Titel</th><th>Special</th><th></th></tr></thead><tbody>' +
       tt.map(function (t) {
         return '<tr><td><input type="checkbox" id="g-' + t.tag + '" data-geprueft="' + t.tag + '"' + (geprueft(t.tag) ? ' checked' : '') + ' aria-label="Türchen ' + t.tag + ' geprüft" style="width:24px;height:24px"></td>' +
-          '<td>' + (t.tag === 0 ? 'Probe' : t.tag) + '<br><small class="leise">' + esc(W.fmtDatumKurz(t.datum)) + '</small></td><td style="white-space:normal">' + esc(t.titel) + '</td>' +
+          '<td>' + (t.tag <= 0 ? 'Probe' : t.tag) + '<br><small class="leise">' + esc(W.fmtDatumKurz(t.datum)) + '</small></td><td style="white-space:normal">' + esc(t.titel) + '</td>' +
           '<td>' + (t.special ? esc(t.special) : '') + (t.faktor > 1 ? ' ×' + t.faktor : '') + '</td>' +
           '<td><button class="knopf klein zart" type="button" data-vorschau="' + t.tag + '">Ansehen</button></td></tr>';
       }).join('') + '</tbody></table></div></section>';
@@ -243,11 +244,19 @@
       (beschriftung ? '<figcaption class="leise" style="font-size:14px">' + esc(beschriftung) + '</figcaption>' : '') + '</figure>';
   }
 
+  function bildGross(name, keys, beschriftung) {
+    if (!name || !keys[name]) return '';
+    return '<figure style="margin:0;display:grid;gap:4px">' + (beschriftung ? '<figcaption class="leise" style="font-size:15px">' + esc(beschriftung) + '</figcaption>' : '') +
+      '<img alt="" data-adm-medium="' + esc(name) + '" style="width:100%;max-height:62vh;object-fit:contain;border-radius:8px;background:#1b0f12;min-height:120px;cursor:zoom-in"></figure>';
+  }
+
+  function insiderZaehlt() { return ((A.daten && A.daten.spieler) || []).some(function (s) { return s.ausgleich > 1 && !s.ausgleichAlle; }); }
+
   function zeichneVorschau(ziel) {
     var r = A.vorschau, t = r.tuer, a = r.aufloesung, keys = r.schluessel;
     var html = '<div class="zeile"><button class="knopf klein zart" type="button" id="v-zurueck">← Alle Türchen</button>' +
       '<label class="zeile" for="v-ok" style="gap:8px;font-weight:700"><input type="checkbox" id="v-ok" style="width:24px;height:24px"' + (geprueft(t.tag) ? ' checked' : '') + '> geprüft</label></div>' +
-      '<section class="karte stapel"><p class="leise">' + (t.tag === 0 ? 'Probetürchen' : 'Türchen ' + t.tag) + ' · ' + esc(W.fmtDatum(t.datum)) + (t.special ? ' · ' + esc(t.special) : '') + (t.faktor > 1 ? ' · ×' + t.faktor : '') + (t.wertung ? '' : ' · ohne Wertung') + '</p>' +
+      '<section class="karte stapel"><p class="leise">' + (t.tag <= 0 ? 'Proberunde' : 'Türchen ' + t.tag) + ' · ' + esc(W.fmtDatum(t.datum)) + (t.special ? ' · ' + esc(t.special) : '') + (t.faktor > 1 ? ' · ×' + t.faktor : '') + (t.wertung ? '' : ' · ohne Wertung') + '</p>' +
       '<h2 style="font-family:var(--f-zier);font-weight:800;font-size:28px">' + esc(t.titel) + '</h2>' +
       '<div class="christkind">' + I.stern + '<p>' + esc(t.gruss || '(kein Gruß)') + '</p></div>' +
       '<p><b>Gedichtzeile:</b> <i>' + esc(t.vers || '–') + '</i></p>' +
@@ -255,24 +264,34 @@
       (t.bonus ? '<p><b>Bonusaufgabe:</b> ' + esc(t.bonus) + '</p>' : '') + '</section>';
     t.fragen.forEach(function (q, i) {
       var l = a.fragen[q.id], m = q.medien;
-      html += '<section class="karte stapel"><p class="leise">Frage ' + (i + 1) + ' · ' + TYPNAME[q.typ] + (l.insider ? ' · Insider' : '') + (q.tippAndere ? ' · mit „Wie viele liegen richtig?“' : '') + '</p>' +
+      html += '<section class="karte stapel"><p class="leise">Frage ' + (i + 1) + ' · ' + TYPNAME[q.typ] + (l.insider && insiderZaehlt() ? ' · Insider' : '') + (q.tippAndere ? ' · mit „Wie viele liegen richtig?“' : '') + '</p>' +
         '<h3 style="font-size:22px">' + esc(q.text) + '</h3>';
+      if (q.video && q.video.voll) {
+        var vid = function (n, titel) { return '<figure style="margin:0;display:grid;gap:4px"><figcaption class="leise" style="font-size:15px">' + titel + '</figcaption><video controls playsinline preload="metadata" data-adm-video="' + esc(n) + '" style="width:100%;max-height:62vh;background:#1b0f12;border-radius:8px"></video></figure>'; };
+        if (q.typ === 'video') html += vid(q.video.teil1, 'So sehen es die Spieler (stoppt an der spannendsten Stelle):') + vid(q.video.voll, 'Nach dem Raten – das ganze Video:');
+        else if (q.typ === 'lied') html += vid(q.video.voll, 'Ganzes Video (die Spieler hören zuerst nur ' + (q.liedSek || []).join(' / ') + ' Sekunden):');
+        else html += vid(q.video.voll, 'Video zur Frage:');
+      } else if (q.typ !== 'zeitstrahl') {
+        (m.start || []).forEach(function (n, k) { html += bildGross(n, keys, (m.start.length > 1 ? 'Foto ' + (k + 1) : 'Foto zur Frage') + ' – so sehen es die Spieler:'); });
+        if ((m.stufen || []).length) {
+          html += '<p class="leise" style="font-size:15px;margin-bottom:0">So wird aufgedeckt (antippen zum Vergrößern):</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">' +
+            m.stufen.map(function (n, k) { return bild(n, keys, 'Stufe ' + (k + 1)); }).join('') + (m.danach || []).map(function (n) { return bild(n, keys, 'ganzes Foto'); }).join('') + '</div>';
+        }
+      }
       if (q.optionen) html += '<ul style="margin:0;padding-left:22px">' + q.optionen.map(function (o) { return '<li' + (o.id === l.richtig ? ' style="color:var(--gut);font-weight:700"' : '') + '>' + esc(o.text) + (o.id === l.richtig ? ' ✓' : '') + '</li>'; }).join('') + '</ul>';
+      if (q.freitext) html += '<p>Textfeld – gesucht: <b>' + esc(l.richtig) + '</b> (Groß-/Kleinschreibung und ein Tippfehler sind egal)</p>';
       if (q.typ === 'schaetzen') html += '<p>Richtig: <b>' + l.richtig + ' ' + esc(q.einheit || '') + '</b> · Bereich ' + q.min + '–' + q.max + '</p>';
       if (q.typ === 'frei') html += '<p>Musterlösung: <b>' + esc(l.richtig || '–') + '</b></p>';
-      if (q.punkteStufen) html += '<p class="leise" style="font-size:15px">Punkte je Stufe: ' + q.punkteStufen.join(' / ') + '</p>';
+      if (q.punkteStufen) html += '<p class="leise" style="font-size:15px">Punkte je Stufe: ' + q.punkteStufen.map(function (x) { return Math.round(x * (q.skala || 1)); }).join(' / ') + '</p>';
+      if (q.sprung) html += '<p class="leise" style="font-size:15px">Sprung-Knopf: ' + esc(q.sprung.text || '') + ' → ' + Math.floor(q.sprung.t / 60) + ':' + ('0' + q.sprung.t % 60).slice(-2) + '</p>';
+      if (q.ohneAusgleich) html += '<p class="leise" style="font-size:15px">Kein Ausgleich für: ' + esc(q.ohneAusgleich.map(function (id) { var s = (A.daten && A.daten.spieler || []).find(function (x) { return x.id === id; }); return s ? s.name : id; }).join(', ')) + '</p>';
       if (l.tipp) html += '<p><b>Christkindl-Tipp:</b> ' + esc(l.tipp) + '</p>';
       html += '<div class="notiz"><b>Auflösung</b>' + esc(l.text || '(keine Geschichte)') + '</div>';
       var bilder = '';
       if (q.typ === 'zeitstrahl') bilder = l.richtig.map(function (id, k) { var b = q.bilder.find(function (x) { return x.id === id; }); return bild(b.n, keys, (k + 1) + '.' + (b.text ? ' ' + b.text : '')); }).join('');
-      else if (q.typ === 'video') bilder = '<video controls playsinline data-adm-video="' + esc(q.video.teil1) + '" style="width:100%"></video><video controls playsinline data-adm-video="' + esc(q.video.voll) + '" style="width:100%"></video>';
-      else {
-        (m.stufen || []).forEach(function (n, k) { bilder += bild(n, keys, 'Stufe ' + (k + 1)); });
-        (m.start || []).forEach(function (n) { bilder += bild(n, keys, ''); });
-        (m.danach || []).forEach(function (n) { bilder += bild(n, keys, 'ganzes Foto'); });
-      }
-      (m.loesung || []).forEach(function (n) { bilder += bild(n, keys, 'Foto zur Auflösung'); });
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">' + bilder + '</div></section>';
+      if (bilder) html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">' + bilder + '</div>';
+      (m.loesung || []).forEach(function (n) { html += bildGross(n, keys, 'Foto, das nach dem Antworten bei der Auflösung erscheint:'); });
+      html += '</section>';
     });
     ziel.innerHTML = html;
     document.getElementById('v-zurueck').onclick = function () { A.vorschau = null; zeichne(); };
